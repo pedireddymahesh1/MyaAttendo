@@ -1,16 +1,14 @@
+# Python
 __pycache__/
 *.py[cod]
 .venv/
-venv/
 .env
-.env.*
-!.env.example
 .pytest_cache/
-.coverage
-instance/
-*.db
-*.sqlite3
-.DS_Store
-Thumbs.db
-.vscode/
+# Android
+.gradle/
+**/build/
+local.properties
+*.jks
+*.keystore
 .idea/
+.DS_Store

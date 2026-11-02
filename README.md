@@ -1,155 +1,101 @@
-# MyAttendo — University-wide Student Platform
+# MyAttendo — Android Attendance Companion
 
-**One University. One Platform. Every Student.**
+**Purpose:** Help Aditya University students view their subject-wise attendance in one simple Android app.
 
-A Flask + MySQL-ready campus platform starter designed for a university deployment with role-based workspaces for administrators, faculty and students.
+MyAttendo is a companion to the university's existing portal. It does **not** replace the university portal, create attendance records, or claim to be an official university application.
 
-> **Important status:** This is a functional starter application, not an official Aditya University system. It does not connect to Aditya University's student information system or attendance portal. University-wide rollout requires written institutional approval, verified data, an authorised integration, security review, privacy review, infrastructure and operational ownership.
+## Current implementation status
 
-## Included modules
+- Android app starter: Kotlin + Jetpack Compose.
+- Backend starter: Flask REST API.
+- Demo mode: sample attendance data for UI development.
+- Integration boundary: provider interface for a future university-authorised API/SSO connector.
+- No scraping, password collection, or automated login to the university portal is implemented.
 
-### Student
-- Secure account sign-in (accounts provisioned by administrators).
-- Subject-wise attendance percentage from sessions recorded in MyAttendo.
-- Attendance labels: 75%+ Safe, 65–74.9% Condonation range, below 65% Below 65%. Confirm actual university regulations before using these labels.
-- Personal tasks / assignments.
-- Enrolled-subject timetable.
+**Live attendance is not available until the university authorises an integration and supplies API/SSO documentation and credentials.**
 
-### Faculty
-- Department-scoped subject list.
-- Mark present / absent / late for enrolled students.
-- Create dated class sessions with period and topic.
-- View recorded sessions.
+## Architecture
 
-### University administrator
-- Create departments and subjects.
-- Create student, faculty and admin accounts.
-- Enrol students in subjects.
-- Bulk-import student accounts using CSV.
-- Export account directory CSV.
-- View basic platform counts.
-
-### Platform
-- Password hashing.
-- Role-based route protection.
-- CSRF protection on forms.
-- SQLAlchemy ORM and MySQL support.
-- SQLite development default.
-- Docker Compose for MySQL + Gunicorn.
-- Demo data seeder.
-- Open-source contribution, security and deployment docs.
-
-## Run locally on Windows
-
-1. Install Python 3.11+.
-2. Extract the ZIP and open PowerShell in the project folder.
-3. Create and activate a virtual environment:
-
-   ```powershell
-   py -m venv .venv
-   .\.venv\Scripts\Activate.ps1
-   ```
-4. Install packages:
-
-   ```powershell
-   pip install -r requirements.txt
-   ```
-5. Copy `.env.example` to `.env`. Set a unique random `SECRET_KEY`. SQLite is used by default for local testing.
-6. Create the first administrator:
-
-   ```powershell
-   python scripts/create_admin.py
-   ```
-7. Start the development server:
-
-   ```powershell
-   flask --app run.py run --debug
-   ```
-8. Open http://127.0.0.1:5000/login.
-
-### Optional demo accounts
-
-Instead of creating an admin manually, run:
-
-```powershell
-python scripts/seed_demo.py
+```text
+Android app (Kotlin / Compose)
+       |
+       | HTTPS + app session token
+       v
+MyAttendo API (Flask)
+       |
+       | server-side provider adapter
+       v
+University-approved API / SSO
+       |
+       v
+Official attendance records
 ```
 
-Demo logins:
-- admin@example.test / ChangeThisDemoPassword123!
-- faculty@example.test / ChangeThisDemoPassword123!
-- student@example.test / ChangeThisDemoPassword123!
-
-**Demo accounts are public sample credentials. Never deploy them. Delete them and create unique accounts before exposing any instance to a network.**
-
-## MySQL / Docker deployment
-
-1. Install Docker Desktop.
-2. Create a deployment `.env` file from `.env.example` and set strong random secrets. Also set `MYSQL_PASSWORD` and `MYSQL_ROOT_PASSWORD`.
-3. Configure the app database URL if running outside Compose, or let Compose construct it from the environment.
-4. Start:
-
-   ```powershell
-   docker compose up --build
-   ```
-5. The app will be available at http://localhost:8000.
-
-This Compose file is a deployment starting point, not a complete university production environment. Add HTTPS reverse proxy, backups, monitoring, alerting, log retention, secret management, database migrations, rate limiting, and a tested recovery plan.
-
-## Bulk student import CSV
-
-The admin page accepts a CSV with these headers:
-
-```csv
-full_name,email,university_id,temporary_password
-Example Student,student1@example.edu,AU-DEMO-001,ChangeMe-Temp-12345
-```
-
-Only import records you are authorised to process. Use a secure password distribution and reset process. Do not email spreadsheets containing passwords. For a real university rollout, use the institution's identity provider/SSO or an approved provisioning method instead of bulk temporary passwords.
+The university remains the system of record. MyAttendo only reads data that the institution has explicitly authorised it to access.
 
 ## Repository structure
 
 ```text
-MyAttendo-University/
-├── app/
-│   ├── __init__.py
-│   ├── models.py
-│   ├── auth.py
-│   ├── main.py
-│   ├── admin.py
-│   ├── faculty.py
-│   ├── student.py
-│   ├── decorators.py
-│   ├── templates/
-│   └── static/
-├── scripts/
-│   ├── create_admin.py
-│   └── seed_demo.py
+MyAttendo-Android/
+├── android/                 # Native Android app (Kotlin + Compose)
+├── backend/                 # Flask API and integration adapter boundary
 ├── docs/
-├── tests/
-├── database/
-├── Dockerfile
-├── docker-compose.yml
-├── requirements.txt
-└── run.py
+│   ├── INTEGRATION_REQUIREMENTS.md
+│   ├── PRIVACY_AND_SECURITY.md
+│   └── RELEASE_PLAN.md
+├── .gitignore
+└── README.md
 ```
 
-## Current limitations / not yet implemented
+## Run the backend locally
 
-- No official Aditya University login, SSO or portal integration.
-- No live attendance sync or scraping of university pages.
-- No automatic import from the university's private student database.
-- No email/SMS/WhatsApp notifications.
-- No timetable administration UI yet (entries can be provisioned in database).
-- No password reset / MFA / audit dashboard / formal approval workflow.
-- No database migration framework yet.
-- No production security certification or penetration test.
-- No verified student adoption, external contributors or download metrics.
+Requires Python 3.11+.
 
-## Required before real university-wide launch
+```powershell
+cd backend
+py -m venv .venv
+.\.venv\Scripts\Activate.ps1
+pip install -r requirements.txt
+Copy-Item .env.example .env
+flask --app run.py run --debug
+```
 
-Read [UNIVERSITY_DEPLOYMENT.md](docs/UNIVERSITY_DEPLOYMENT.md) and [SECURITY_CHECKLIST.md](docs/SECURITY_CHECKLIST.md). Obtain written permission from university IT/administration, confirm data-controller responsibilities and privacy obligations, agree the official data source, run a security review, pilot with synthetic data, and only then conduct a limited authorised pilot.
+The backend defaults to `DEMO_MODE=true` and exposes sample data only. This is for development and does not represent real university records.
 
-## Open-source
+- Health: `http://127.0.0.1:5000/api/v1/health`
+- Attendance: `http://127.0.0.1:5000/api/v1/attendance`
 
-See [CONTRIBUTING.md](CONTRIBUTING.md), [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md), and [SECURITY.md](SECURITY.md). The project is licensed under MIT; review and accept this license choice before publishing if you are not the sole copyright holder.
+For Android Emulator, use `http://10.0.2.2:5000/` as the development API base URL. For a physical phone, use your computer's LAN IP and ensure both devices are on the same trusted network. Do not expose the debug server to the public internet.
+
+## Open Android app
+
+1. Install Android Studio (current stable).
+2. Open the `android/` folder.
+3. Allow Gradle sync.
+4. Run the `app` configuration on an emulator or Android phone.
+5. The starter UI displays demo attendance. Update `BuildConfig.API_BASE_URL` in `android/app/build.gradle.kts` for your local backend.
+
+The Android app currently uses a sample UI state. Wire it to the backend after verifying the local API and selecting the deployment/authentication approach.
+
+## University integration: what is needed
+
+Before live integration, obtain written approval and the university's supported integration specification:
+- API base URL, API documentation, test environment and rate limits.
+- Supported student authentication method (prefer university SSO/OAuth/OIDC).
+- Approved scopes/permissions for read-only attendance access.
+- Stable student/course identifiers and attendance response schema.
+- Token expiry, refresh, revocation and logout requirements.
+- Data retention, privacy notice, incident contact and support owner.
+
+Do not ask students to type their university password into MyAttendo. Do not store university passwords. Do not scrape private portal pages or automate portal login unless the university explicitly authorises that exact mechanism in writing.
+
+## What is not implemented yet
+
+- Live Aditya University authentication or attendance sync.
+- University-issued API credentials or SSO.
+- Push notifications.
+- Offline cache and background sync.
+- Attendance history charts and export.
+- Play Store release signing and production deployment.
+
+See `docs/` before attempting a real integration.
